@@ -167,6 +167,14 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "NestedCluster")
 		os.Exit(1)
 	}
+	if err = (&controllers.NestedMachineReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("NestedMachine"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "NestedMachine")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("Starting manager", "version", version.Get().String())
