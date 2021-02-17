@@ -143,7 +143,6 @@ apidiff: $(GO_APIDIFF) ## Check for API differences
 generate: ## Generate code
 	$(MAKE) generate-manifests
 	$(MAKE) generate-go
-	$(MAKE) generate-bindata
 
 .PHONY: generate-go
 generate-go: ## Runs Go related generate targets
