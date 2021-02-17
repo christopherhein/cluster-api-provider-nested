@@ -150,12 +150,12 @@ generate-go: ## Runs Go related generate targets
 	go generate ./...
 	$(CONTROLLER_GEN) \
 		object:headerFile=./hack/boilerplate/boilerplate.generatego.txt \
-		paths=./apis/...
+		paths=./api/...
 
 .PHONY: generate-manifests
 generate-manifests: ## Generate manifests e.g. CRD, RBAC etc.
 	$(CONTROLLER_GEN) \
-		paths=./apis/... \
+		paths=./api/... \
 		paths=./controllers/... \
 		crd:crdVersions=v1 \
 		rbac:roleName=manager-role \

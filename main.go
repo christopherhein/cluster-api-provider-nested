@@ -32,12 +32,8 @@ import (
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha4"
 	"sigs.k8s.io/cluster-api/cmd/version"
 	"sigs.k8s.io/cluster-api/feature"
-	"sigs.k8s.io/cluster-api/util"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
-
-	controlplanev1alpha4 "sigs.k8s.io/cluster-api-provider-nested/apis/controlplane/v1alpha4"
-	controlplanecontrollers "sigs.k8s.io/cluster-api-provider-nested/controllers/controlplane"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -62,7 +58,6 @@ func init() {
 
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(clusterv1.AddToScheme(scheme))
-	utilruntime.Must(controlplanev1alpha4.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -123,7 +118,6 @@ func main() {
 		RenewDeadline:          &leaderElectionRenewDeadline,
 		RetryPeriod:            &leaderElectionRetryPeriod,
 		SyncPeriod:             &syncPeriod,
-		NewClient:              util.ManagerDelegatingClientFunc,
 		Port:                   webhookPort,
 		HealthProbeBindAddress: healthAddr,
 	})
@@ -146,24 +140,8 @@ func main() {
 	}
 
 	// TODO(community): Register controllers and webhooks here.
-	if err = (&controlplanecontrollers.NestedControlPlaneReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("controlplane").WithName("NestedControlPlane"),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "NestedControlPlane")
-		os.Exit(1)
-	}
-
-	if err = (&controlplanecontrollers.NestedEtcdReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("controlplane").WithName("NestedEtcd"),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "NestedEtcd")
-		os.Exit(1)
-	}
 	// +kubebuilder:scaffold:builder
+
 	setupLog.Info("Starting manager", "version", version.Get().String())
 	if err := mgr.Start(ctx); err != nil {
 		setupLog.Error(err, "problem running manager")
