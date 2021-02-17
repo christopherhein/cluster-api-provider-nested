@@ -140,19 +140,19 @@ apidiff: $(GO_APIDIFF) ## Check for API differences
 ## --------------------------------------
 
 .PHONY: generate
-generate: ## Generate code
+generate: $(CONTROLLER_GEN) ## Generate code
 	$(MAKE) generate-manifests
 	$(MAKE) generate-go
 
 .PHONY: generate-go
-generate-go: ## Runs Go related generate targets
+generate-go: $(CONTROLLER_GEN) ## Runs Go related generate targets
 	go generate ./...
 	$(CONTROLLER_GEN) \
 		object:headerFile=./hack/boilerplate/boilerplate.generatego.txt \
 		paths=./api/...
 
 .PHONY: generate-manifests
-generate-manifests: ## Generate manifests e.g. CRD, RBAC etc.
+generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
 	$(CONTROLLER_GEN) \
 		paths=./api/... \
 		paths=./controllers/... \
