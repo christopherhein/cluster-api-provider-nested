@@ -42,6 +42,7 @@ var (
 	setupLog = ctrl.Log.WithName("setup")
 
 	// flags
+	configFile                  string
 	metricsAddr                 string
 	enableLeaderElection        bool
 	leaderElectionLeaseDuration time.Duration
@@ -63,6 +64,9 @@ func init() {
 
 // InitFlags initializes the flags.
 func InitFlags(fs *pflag.FlagSet) {
+	fs.StringVar(&configFile, "config", "",
+		"The controller will load its initial configuration from this file. Omit this flag to use the default configuration values. Command-line flags override configuration from this file.")
+
 	fs.StringVar(&metricsAddr, "metrics-bind-address", ":8080",
 		"The address the metric endpoint binds to.")
 
@@ -109,7 +113,8 @@ func main() {
 		}()
 	}
 
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+	//
+	options := ctrl.Options{
 		Scheme:                 scheme,
 		MetricsBindAddress:     metricsAddr,
 		LeaderElection:         enableLeaderElection,
@@ -120,7 +125,17 @@ func main() {
 		SyncPeriod:             &syncPeriod,
 		Port:                   webhookPort,
 		HealthProbeBindAddress: healthAddr,
-	})
+	}
+	if configFile != "" {
+		var err error
+		options, err = options.AndFrom(ctrl.ConfigFile().AtPath(configFile))
+		if err != nil {
+			setupLog.Error(err, "unable to load the config file")
+			os.Exit(1)
+		}
+	}
+
+	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
