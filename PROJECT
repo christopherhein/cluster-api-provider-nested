@@ -3,5 +3,14 @@ domain: cluster.x-k8s.io
 layout: go.kubebuilder.io/v3
 projectName: cluster-api-provider-nested
 repo: sigs.k8s.io/cluster-api-provider-nested
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: cluster.x-k8s.io
+  group: infrastructure
+  kind: NestedCluster
+  path: sigs.k8s.io/cluster-api-provider-nested/api/v1alpha3
+  version: v1alpha3
 version: "3"
-

@@ -34,6 +34,9 @@ import (
 	"sigs.k8s.io/cluster-api/feature"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
+
+	infrastructurev1alpha3 "sigs.k8s.io/cluster-api-provider-nested/api/v1alpha3"
+	"sigs.k8s.io/cluster-api-provider-nested/controllers"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -59,6 +62,7 @@ func init() {
 
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(clusterv1.AddToScheme(scheme))
+	utilruntime.Must(infrastructurev1alpha3.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -155,6 +159,14 @@ func main() {
 	}
 
 	// TODO(community): Register controllers and webhooks here.
+	if err = (&controllers.NestedClusterReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("NestedCluster"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "NestedCluster")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("Starting manager", "version", version.Get().String())
